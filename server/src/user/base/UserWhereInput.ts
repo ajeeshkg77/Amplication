@@ -13,9 +13,8 @@ import { InputType, Field } from "@nestjs/graphql";
 import { ApiProperty } from "@nestjs/swagger";
 import { StringNullableFilter } from "../../util/StringNullableFilter";
 import { Type } from "class-transformer";
-import { IsOptional, ValidateNested } from "class-validator";
+import { IsOptional } from "class-validator";
 import { StringFilter } from "../../util/StringFilter";
-import { ProjectListRelationFilter } from "../../project/base/ProjectListRelationFilter";
 @InputType()
 class UserWhereInput {
   @ApiProperty({
@@ -50,18 +49,6 @@ class UserWhereInput {
     nullable: true,
   })
   lastName?: StringNullableFilter;
-
-  @ApiProperty({
-    required: false,
-    type: () => ProjectListRelationFilter,
-  })
-  @ValidateNested()
-  @Type(() => ProjectListRelationFilter)
-  @IsOptional()
-  @Field(() => ProjectListRelationFilter, {
-    nullable: true,
-  })
-  projects?: ProjectListRelationFilter;
 
   @ApiProperty({
     required: false,

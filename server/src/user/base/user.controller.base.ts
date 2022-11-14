@@ -27,9 +27,6 @@ import { UserWhereUniqueInput } from "./UserWhereUniqueInput";
 import { UserFindManyArgs } from "./UserFindManyArgs";
 import { UserUpdateInput } from "./UserUpdateInput";
 import { User } from "./User";
-import { ProjectFindManyArgs } from "../../project/base/ProjectFindManyArgs";
-import { Project } from "../../project/base/Project";
-import { ProjectWhereUniqueInput } from "../../project/base/ProjectWhereUniqueInput";
 @swagger.ApiBearerAuth()
 @common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class UserControllerBase {
@@ -192,109 +189,5 @@ export class UserControllerBase {
       }
       throw error;
     }
-  }
-
-  @common.UseInterceptors(AclFilterResponseInterceptor)
-  @nestAccessControl.UseRoles({
-    resource: "Project",
-    action: "read",
-    possession: "any",
-  })
-  @common.Get("/:id/projects")
-  @ApiNestedQuery(ProjectFindManyArgs)
-  async findManyProjects(
-    @common.Req() request: Request,
-    @common.Param() params: UserWhereUniqueInput
-  ): Promise<Project[]> {
-    const query = plainToClass(ProjectFindManyArgs, request.query);
-    const results = await this.service.findProjects(params.id, {
-      ...query,
-      select: {
-        createdAt: true,
-        description: true,
-        id: true,
-        name: true,
-        startDate: true,
-        updatedAt: true,
-
-        user: {
-          select: {
-            id: true,
-          },
-        },
-      },
-    });
-    if (results === null) {
-      throw new errors.NotFoundException(
-        `No resource was found for ${JSON.stringify(params)}`
-      );
-    }
-    return results;
-  }
-
-  @nestAccessControl.UseRoles({
-    resource: "User",
-    action: "update",
-    possession: "any",
-  })
-  @common.Post("/:id/projects")
-  async connectProjects(
-    @common.Param() params: UserWhereUniqueInput,
-    @common.Body() body: ProjectWhereUniqueInput[]
-  ): Promise<void> {
-    const data = {
-      projects: {
-        connect: body,
-      },
-    };
-    await this.service.update({
-      where: params,
-      data,
-      select: { id: true },
-    });
-  }
-
-  @nestAccessControl.UseRoles({
-    resource: "User",
-    action: "update",
-    possession: "any",
-  })
-  @common.Patch("/:id/projects")
-  async updateProjects(
-    @common.Param() params: UserWhereUniqueInput,
-    @common.Body() body: ProjectWhereUniqueInput[]
-  ): Promise<void> {
-    const data = {
-      projects: {
-        set: body,
-      },
-    };
-    await this.service.update({
-      where: params,
-      data,
-      select: { id: true },
-    });
-  }
-
-  @nestAccessControl.UseRoles({
-    resource: "User",
-    action: "update",
-    possession: "any",
-  })
-  @common.Delete("/:id/projects")
-  async disconnectProjects(
-    @common.Param() params: UserWhereUniqueInput,
-    @common.Body() body: ProjectWhereUniqueInput[]
-  ): Promise<void> {
-    const data = {
-      projects: {
-        disconnect: body,
-      },
-    };
-    await this.service.update({
-      where: params,
-      data,
-      select: { id: true },
-    });
   }
 }
